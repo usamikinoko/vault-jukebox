@@ -1,0 +1,297 @@
+/* ------------------------------------------------------------------ layout */
+
+.mp-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mp-root:focus {
+  outline: none;
+}
+
+/* The sidebar is fixed and the list takes everything else; `min-width: 0` on
+   the main pane is what stops a long track title from pushing the volume slider
+   off the right edge. */
+.mp-body {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------- icon buttons
+
+   Every transport control, every "…" affordance and the sort direction button
+   are the same object: a square with no chrome until you point at it. No
+   border, no shadow — the fill on hover is the entire feedback. */
+
+/* `body ` on the button-family base rules is not decoration, but it is less
+   than it looks. Obsidian styles every button with
+   `button:not(.clickable-icon)` at (0,1,1) — background, colour and a five-layer
+   `--input-shadow` — which outranks a plain (0,1,0) class. That is exactly why
+   unchecked checkboxes once rendered looking checked (host fill + visible icon)
+   and why the whole toolbar carried shadows.
+
+   `body .mp-btn` is also (0,1,1), so the prefix does NOT out-rank the host: it
+   ties, and wins on source order, because Obsidian appends a plugin's
+   styles.css after app.css. Verified by swapping the two stylesheets in a test
+   page — the host shadow returns immediately. So every property the host also
+   declares is pinned here rather than inherited. */
+
+body .mp-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--mp-icon-size);
+  height: var(--mp-icon-size);
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: var(--mp-radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--mp-dur) var(--mp-ease),
+    color var(--mp-dur) var(--mp-ease);
+}
+
+body .mp-icon-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.mp-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* The on-state for a mode button (loop not on "playlist", rate not 1×, muted):
+   accent ink, still no chrome at rest. */
+.mp-icon-btn.is-alt {
+  color: var(--interactive-accent);
+}
+
+.mp-icon-btn svg,
+.mp-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------- text button
+
+   One height for every control in a toolbar — text buttons, the search field,
+   the sort button — so a row of them reads as one row and not as four objects
+   that happen to be adjacent. */
+
+body .mp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--mp-control-h);
+  padding: 0 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--mp-radius);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  line-height: 1;
+  /* A narrow pane squeezes the toolbar; a button label that breaks in half is
+     worse than one that forces the toolbar to wrap onto its own line. */
+  white-space: nowrap;
+  flex: 0 0 auto;
+  cursor: pointer;
+  transition: background-color var(--mp-dur) var(--mp-ease),
+    border-color var(--mp-dur) var(--mp-ease),
+    color var(--mp-dur) var(--mp-ease);
+}
+
+.mp-btn:hover {
+  background: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+
+/* Destructive actions are marked in ink, not by being filled red: a red block in
+   a toolbar of quiet buttons shouts about a button nobody has pressed yet. */
+.mp-btn.is-danger {
+  color: var(--text-error);
+}
+
+.mp-btn.is-danger:hover {
+  border-color: var(--text-error);
+  background: var(--background-modifier-error);
+  color: var(--text-error);
+}
+
+/* The one filled variant. Kept for the single primary action in a region —
+   filling everything is how a toolbar turns into noise. */
+.mp-btn.mod-cta {
+  border-color: transparent;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.mp-btn.mod-cta:hover {
+  background: var(--interactive-accent-hover);
+  color: var(--text-on-accent);
+}
+
+/* ----------------------------------------------------------------- checkbox
+
+   A real button rather than `input[type=checkbox]`: Obsidian ships a whole set
+   of checkbox variables and sizes, and borrowing them would make this the one
+   control in the plugin whose look we do not own. Flat square, accent fill on
+   check, no shadow. */
+
+body .mp-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 1px solid var(--background-modifier-border-hover);
+  border-radius: var(--mp-radius);
+  background: transparent;
+  box-shadow: none;
+  /* The unchecked box hides its glyph in ink, not in `display`: the layout is
+     identical whether checked or not, and `is-on` only swaps the two colours. */
+  color: transparent;
+  cursor: pointer;
+  transition: background-color var(--mp-dur) var(--mp-ease),
+    border-color var(--mp-dur) var(--mp-ease),
+    color var(--mp-dur) var(--mp-ease);
+}
+
+.mp-check:hover {
+  border-color: var(--text-muted);
+}
+
+.mp-check.is-on {
+  border-color: var(--interactive-accent);
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.mp-check svg {
+  width: 11px;
+  height: 11px;
+  stroke-width: 3.4;
+}
+
+/* Obsidian draws keyboard focus as a 3px box-shadow ring; redraw the same
+   signal as an outline so "no shadow" survives the focus walk, too. */
+body .mp-btn:focus-visible,
+body .mp-icon-btn:focus-visible,
+body .mp-check:focus-visible {
+  box-shadow: none;
+  outline: 1px solid var(--interactive-accent);
+  outline-offset: 1px;
+}
+
+/* ------------------------------------------------------------- empty states
+
+   One shape for all four of them — no music folder, a missing one, an empty
+   playlist, a query with no hits. They are different sentences, not different
+   screens. The badge is a flat disc rather than an emoji: emoji render
+   differently on every platform and carry colour a monochrome interface cannot
+   account for. */
+
+.mp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* Fills whatever room the list has; `track-list.css` makes the list a column
+     flex precisely so this has something to fill and the block ends up in the
+     middle of the pane rather than under the toolbar. */
+  flex: 1 1 auto;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.mp-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 4px;
+  border-radius: var(--mp-radius);
+  background: var(--background-modifier-hover);
+  color: var(--text-faint);
+}
+
+.mp-empty-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mp-empty-title {
+  font-size: var(--font-ui-medium);
+  font-weight: 600;
+}
+
+.mp-empty-hint {
+  max-width: 420px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.6;
+}
+
+.mp-empty-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* -------------------------------------------------------------- status bar */
+
+.mp-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 260px;
+  cursor: pointer;
+}
+
+.mp-status.is-hidden {
+  display: none;
+}
+
+.mp-status.is-idle {
+  color: var(--text-faint);
+}
+
+.mp-status-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-accent);
+}
+
+.mp-status.is-playing .mp-status-icon {
+  color: var(--interactive-accent);
+}
+
+.mp-status-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mp-status-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

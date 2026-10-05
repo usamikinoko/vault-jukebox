@@ -1,0 +1,10 @@
+{
+  "id": "vault-jukebox",
+  "name": "Vault Jukebox",
+  "version": "0.2.1",
+  "minAppVersion": "1.4.0",
+  "description": "Play the audio in a vault: a playlist tree built from one music folder, a searchable track list and a transport bar. Drag tracks between playlists, sort by title, artist, size or date, set the speed, and resume the last track after a restart.",
+  "author": "hypokinoko",
+  "authorUrl": "",
+  "isDesktopOnly": true
+}

@@ -1,0 +1,153 @@
+/* --------------------------------------------------------------- main pane */
+
+.mp-main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The toolbar. Its three zones are ordered by how often they are touched:
+   the title is read, the search box is typed in, the sort controls are a
+   once-a-session decision. */
+.mp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 8px 10px 8px 14px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex-wrap: wrap;
+}
+
+.mp-head-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mp-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-ui-medium);
+  font-weight: 600;
+}
+
+.mp-count {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  /* Wraps in turn, so a leaf dragged narrow degrades to more rows instead of
+     pushing the last control off the edge where it cannot be reached. */
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mp-search {
+  /* Grows with the pane up to a point and is capped there: a search field that
+     is 600px wide on a wide leaf is a search field that reads as the most
+     important thing on screen, and it is not. */
+  flex: 1 1 130px;
+  min-width: 110px;
+  max-width: 280px;
+  height: var(--mp-control-h);
+  font-size: var(--font-ui-smaller);
+}
+
+/* The field's frame carries `body ` because Obsidian styles text inputs at
+   (0,1,1) with a form-field background and, on focus, a box-shadow ring.
+   `body .mp-search` is ALSO (0,1,1) — it ties rather than out-ranks, and wins
+   only because Obsidian appends a plugin's styles.css after app.css. Proven by
+   swapping the two stylesheets in a test page: the host ring comes back.
+   Flat frame, hairline border, outline focus. */
+body .mp-search {
+  padding: 0 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--mp-radius);
+  background: var(--background-primary);
+  box-shadow: none;
+}
+
+body .mp-search:hover {
+  border-color: var(--background-modifier-border-hover);
+}
+
+body .mp-search:focus-visible {
+  border-color: var(--interactive-accent);
+  box-shadow: none;
+  outline: none;
+}
+
+/* The sort control is a plain button that opens a menu, not a <select>.
+
+   A native select carries the OS arrow, the OS focus ring and a height no
+   stylesheet fully controls, which is why it was the one control in this
+   toolbar that never matched the rest. A button plus a menu is the same
+   information — label, current value, list of choices — in the vocabulary the
+   rest of the plugin already speaks.
+
+   It carries `mp-btn`, so the frame comes from one place; only the gap and the
+   tighter right padding (the chevron is its own box) are different here. */
+.mp-sort-btn {
+  gap: 4px;
+  padding: 0 6px 0 10px;
+}
+
+.mp-sort-btn .mp-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.mp-sort-label {
+  color: var(--text-muted);
+}
+
+.mp-sort-value {
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------- selection bar
+
+   Only present while something is selected. It is a toolbar over the list, not
+   a floating bar: the list is the only thing it acts on and it should not cover
+   the first row. */
+
+.mp-selbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  font-size: var(--font-ui-smaller);
+}
+
+.mp-selbar.is-hidden {
+  display: none;
+}
+
+.mp-selbar-count {
+  margin-right: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.mp-selbar-hint {
+  margin-left: 6px;
+  color: var(--text-faint);
+  font-weight: 400;
+}
+

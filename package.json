@@ -1,0 +1,20 @@
+{
+  "name": "vault-jukebox",
+  "version": "0.2.1",
+  "description": "Vault music player for Obsidian: playlist tree, track list, transport bar.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "test": "node test/logic.cjs && node test/tokens.cjs && node test/smoke.cjs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "esbuild": "^0.24.2",
+    "jsdom": "^30.1.1",
+    "obsidian": "latest",
+    "typescript": "^5.7.2"
+  }
+}

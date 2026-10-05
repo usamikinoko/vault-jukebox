@@ -1,0 +1,111 @@
+/* ----------------------------------------------------------------- sliders
+
+   `player-bar.css` lays out the bar; this shard owns the two range inputs
+   (seek and volume) and the specificity war that keeps their thumbs centred.
+
+   ⚠️ This block is a specificity war, and losing it is not a subtle failure —
+   it is a slider that is 3px tall, 18px wide-thumbed, white, drop-shadowed, and
+   6px off centre.
+
+   Obsidian's own baseline styles `input[type='range']` (0,1,1) and its
+   pseudo-elements (0,1,2). A plain `.mp-range::-webkit-slider-thumb` is (0,1,1)
+   and therefore *loses on every property Obsidian also declares* — which is
+   most of them: height, width, border-radius, background, border, position,
+   top, transition, box-shadow. What actually rendered was Obsidian's white
+   18px thumb with its two-layer shadow, nudged by `top: var(--slider-thumb-y)`
+   (-6px) and by our own `margin-top: -4px` computed for a 12px thumb — a net
+   4px up and to the wrong side of centre.
+
+   So the selectors below are written at (0,3,2) / (0,3,3), and every property
+   Obsidian touches is spelled out rather than inherited. Two of them exist for
+   no reason other than to neutralise the host:
+
+     position: static + top: auto   kill `position: relative; top: -6px`
+     box-shadow: none               kill the two-layer drop shadow
+
+   Verified by pixel-measuring a 6x screenshot (见 preview/probe_slider.py):
+   thumb centre vs track centre is 0.0px, track centre vs input box centre 0.0px.
+
+   Chromium only — Electron has no `-moz-range-*` engine behind it, so the usual
+   Firefox twin rules would be dead bytes. */
+
+body .mp-root input[type="range"].mp-range {
+  -webkit-appearance: none;
+  appearance: none;
+  /* Equal to the thumb, so the flex row centres the *thumb*, not a stray box. */
+  height: var(--mp-slider-h);
+  /* Through a token, not a direct `width`: a per-variant width would need its
+     own selector, and this rule is deliberately unbeatable. */
+  width: var(--mp-range-w, auto);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  /* Obsidian paints the input box itself with `--slider-track-background`; that
+     would draw a second bar behind the real track. */
+  background: transparent;
+  background-color: transparent;
+  /* The host also rings focused inputs with a box-shadow; killed here, redrawn
+     as an outline below. */
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+}
+
+body .mp-root input[type="range"].mp-range:focus-visible {
+  outline: 1px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+body .mp-root input[type="range"].mp-range::-webkit-slider-runnable-track {
+  height: var(--mp-track-h);
+  border: 0;
+  border-radius: 999px;
+  /* The played portion is a gradient stop rather than an element: `--mp-fill` is
+     declared as 0% in shell.css and overwritten inline by the view on every
+     paint, because a range input has no other way to show progress. */
+  background-image: linear-gradient(
+    to right,
+    var(--interactive-accent) 0 var(--mp-fill),
+    var(--background-modifier-border) var(--mp-fill) 100%
+  );
+}
+
+body .mp-root input[type="range"].mp-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--mp-thumb-size);
+  height: var(--mp-thumb-size);
+  /* (track − thumb) / 2. Written as arithmetic so the two tokens can never
+     drift apart — the previous hard-coded `-4px` assumed a 12px thumb that the
+     host had already overridden to 18px. */
+  margin: calc((var(--mp-track-h) - var(--mp-thumb-size)) / 2) 0 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--interactive-accent);
+  cursor: pointer;
+  /* Kills the host's `position: relative; top: var(--slider-thumb-y)` and its
+     two-layer box-shadow, both of which are what actually mis-centred the
+     thumb. `static` + the negative margin above is the whole alignment fix. */
+  position: static;
+  top: auto;
+  box-shadow: none;
+  /* The only motion left in the slider. Scaling about the centre keeps the
+     thumb's visual centre on the track's centre line, so this is affordance
+     rather than movement. */
+  transition: transform var(--mp-dur) var(--mp-ease);
+}
+
+body .mp-root input[type="range"].mp-range:hover::-webkit-slider-thumb,
+body .mp-root input[type="range"].mp-range:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.18);
+}
+
+body .mp-root input[type="range"].mp-range:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mp-seek {
+  flex: 1 1 auto;
+  min-width: 0;
+}

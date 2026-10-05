@@ -1,0 +1,98 @@
+/* ------------------------------------------------------------------ motion
+
+   Design tokens: motion, geometry and the derived washes. This shard is first
+   in the cascade so every later shard can spend the tokens it declares.
+
+   Every transition in this stylesheet is written with these tokens, so the
+   whole interface can be calmed down or switched off from one place
+   (设置 → 界面动效). The durations are chosen by what the change means, not by
+   which element it happens to be on:
+
+     fast   90ms  tone on something you are already pointing at — the row under
+                  the pointer, an icon button's fill
+     base  140ms  an affordance appearing or moving a little: the selection bar
+                  sliding in, a row taking the accent colour
+     slow  190ms  real travel: the tree row highlight, the seek thumb
+
+   Anything over ~200ms reads as the interface lagging behind the pointer;
+   anything under ~80ms reads as a jump cut rather than a transition.
+
+   Why <body> and not the view root: Obsidian appends modals to <body>, so this
+   is the one scope that reaches the view, the pickers and the confirm boxes
+   alike. The attribute is written by the plugin (main.ts → applyMotion) and is
+   the only thing that reads the setting.
+
+   `full` is declared together with the bare `body` rule on purpose: the custom
+   properties cascade per element, so the attribute selector (0,1,1) beats the
+   reduced-motion media query (0,1,0) below — an explicit choice in settings
+   wins over the OS default, and the OS default still applies when nothing has
+   been chosen yet. */
+
+body,
+body[data-mp-motion="full"] {
+  /* One duration, one easing. Every transition in this plugin is pointer
+     feedback or a per-second repaint, and both want to feel instantaneous —
+     so a second, slower duration would only ever be a token nobody spends.
+     The `fast/base/slow` ladder this replaced had exactly that problem: two
+     thirds of it was never referenced. */
+  --mp-dur: 90ms;
+  /* A single curve used everywhere reads as "this UI has a rhythm"; three
+     curves read as "nobody was in charge". No overshoot — spring easing is
+     motion, and motion is the thing we are cutting. */
+  --mp-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* --- geometry ---------------------------------------------------------
+     One radius and three sizes is the whole vocabulary. Anything that needs
+     a fourth value is usually doing too much. */
+  --mp-radius: 4px;
+  --mp-icon-size: 28px;
+  --mp-transport-size: 32px;
+  /* One height for every control in a toolbar. Mixing 26px text controls with
+     28px icon buttons leaves a 1px lip that reads as "misaligned" without
+     anyone being able to say why. */
+  --mp-control-h: 28px;
+
+  /* Sliders are shared by the seek bar and the volume bar, so their geometry
+     lives in one place. `--mp-thumb-size` doubles as the input's box height,
+     which is what keeps the thumb, the track and the flex line all centred on
+     the same pixel — see player-bar.css for the specificity war this wins. */
+  --mp-track-h: 4px;
+  --mp-thumb-size: 12px;
+  --mp-slider-h: 16px;
+  /* An inline-written token still needs an initial value in CSS, otherwise the
+     gradient that consumes it is undefined until the first paint from TS. */
+  --mp-fill: 0%;
+}
+
+body[data-mp-motion="reduced"] {
+  --mp-dur: 60ms;
+}
+
+body[data-mp-motion="none"] {
+  --mp-dur: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    --mp-dur: 0ms;
+  }
+}
+
+/* ------------------------------------------------------------- flat palette
+
+   Two soft washes, both derived from the theme accent so a pink theme gets a
+   pink zebra stripe. Declared in @supports because `color-mix()` is what makes
+   them theme-aware; without it the fallback is simply "no tint", which is the
+   correct degradation rather than a wrong colour.
+
+   Why not `rgba(...)`: a fixed channel value would be a light-theme grey that
+   turns into a smudge on a dark theme. Mixing *into* `transparent` keeps the
+   alpha honest on both. */
+
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  body {
+    --mp-zebra: color-mix(in srgb, var(--interactive-accent) 5%, transparent);
+    --mp-sel-wash: color-mix(in srgb, var(--interactive-accent) 15%, transparent);
+  }
+}
+

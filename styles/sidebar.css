@@ -1,0 +1,166 @@
+/* ------------------------------------------------------------- playlist column
+
+   A playlist is a folder, so this reads as a folder tree — but it is only ever
+   one level deep, so the "tree" is a root caption and a flat list of children.
+   No disclosure triangles: there is nothing to disclose. */
+
+.mp-sidebar {
+  display: flex;
+  flex-direction: column;
+  /* Shrinks, but only down to the width of a playlist name and its count: at a
+     208px fixed width in a 560px leaf the column was eating a third of the pane
+     to show four words. */
+  flex: 0 1 208px;
+  width: 208px;
+  min-width: 150px;
+  overflow: hidden;
+  border-right: 1px solid var(--background-modifier-border);
+}
+
+.mp-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 8px 8px 8px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.mp-sidebar-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.mp-sidebar-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.mp-tree {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 4px 6px 16px;
+}
+
+/* The root is a caption, not a row: it names where the playlists live, and
+   clicking it would have nowhere to go. */
+.mp-tree-root {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  color: var(--text-faint);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mp-tree-root .mp-tree-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-tree-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px 6px 16px;
+  border-radius: var(--mp-radius);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--mp-dur) var(--mp-ease),
+    color var(--mp-dur) var(--mp-ease);
+}
+
+.mp-tree-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+/* The active playlist gets the same leading bar the selected track rows get —
+   one shape for "this is the thing you are looking at", in both columns. */
+.mp-tree-row.is-active {
+  background: var(--background-modifier-hover);
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+.mp-tree-row.is-active::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--interactive-accent);
+}
+
+.mp-tree-row.is-active {
+  padding-left: 18px;
+}
+
+/* A drop target is a flat accent wash plus a hairline, not a ring: a 2px inset
+   shadow around a row is a third kind of highlight on a list that already has
+   two, and it made the row under the pointer look like an input field.
+   The hairline is an `outline` rather than `box-shadow: inset` because it *is*
+   a 1px stroke — saying so in the property that means it costs no shadow layer,
+   which is the whole point of the flat pass. */
+.mp-tree-row.is-drop-target {
+  background: var(--mp-sel-wash, var(--background-modifier-active-hover));
+  color: var(--text-accent);
+  outline: 1px solid var(--interactive-accent);
+  outline-offset: -1px;
+}
+
+.mp-tree-row .mp-icon {
+  color: var(--text-faint);
+}
+
+.mp-tree-row.is-active .mp-icon {
+  color: var(--text-accent);
+}
+
+.mp-tree-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-tree-badge {
+  flex: 0 0 auto;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: var(--mp-radius);
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-tree-row.is-active .mp-tree-badge {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.mp-tree-empty {
+  padding: 10px 12px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.6;
+}

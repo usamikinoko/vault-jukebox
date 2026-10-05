@@ -1,0 +1,74 @@
+/* The three small dialogs: rename / new playlist, the folder picker and the
+   delete confirmation. Obsidian owns the modal shell; these rules only set the
+   inside. */
+
+.mp-modal h3 {
+  margin: 0 0 10px;
+  font-size: var(--font-ui-medium);
+}
+
+.mp-prompt-input {
+  width: 100%;
+  height: var(--mp-control-h);
+  padding: 0 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--mp-radius);
+  background: var(--background-primary);
+  box-shadow: none;
+}
+
+.mp-prompt-input:focus-visible {
+  border-color: var(--interactive-accent);
+  box-shadow: none;
+  outline: none;
+}
+
+.mp-prompt-error {
+  min-height: 16px;
+  padding-top: 4px;
+  color: var(--text-error);
+  font-size: var(--font-ui-smaller);
+}
+
+.mp-modal-body {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.6;
+}
+
+.mp-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ------------------------------------------------------------- folder picker */
+
+.mp-folder-list {
+  max-height: 320px;
+  margin-top: 8px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--mp-radius);
+  padding: 4px;
+}
+
+.mp-folder-row {
+  padding: 5px 8px;
+  border-radius: var(--mp-radius);
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+  transition: background-color var(--mp-dur) var(--mp-ease);
+}
+
+.mp-folder-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+.mp-folder-empty {
+  padding: 10px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  text-align: center;
+}

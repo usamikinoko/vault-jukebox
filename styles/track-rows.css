@@ -1,0 +1,276 @@
+/* ------------------------------------------------------------------- list */
+
+/*
+ * The list and its rows. `track-list.css` owns the frame (pane, toolbar,
+ * selection bar); this shard owns everything below the toolbar, including the
+ * row checkboxes and the playing/selected/focus decorations.
+ */
+
+.mp-list-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* A column flex so the list can be told to fill it: the empty state is
+     centred with `flex: 1`, which only means anything if its parent has a
+     height to divide up. `height: 100%` on the empty box would resolve against
+     `.mp-list`'s auto height and collapse to the content. */
+  display: flex;
+  flex-direction: column;
+}
+
+.mp-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  /* No horizontal inset: rows are full-bleed so the alternating stripe reads as
+     a stripe and not as a stack of rounded cards. The row's own padding is what
+     keeps the text off the edge. */
+  padding: 0 0 12px;
+}
+
+/* ------------------------------------------------------------------- rows
+
+   The row is the unit: no card inside it, no inner box around the title.
+
+   Three states, deliberately drawn three different ways so they never have to
+   be told apart:
+     zebra stripe  a faint accent wash on every other row — depth, not state
+     hover         a translucent overlay *layered over* the stripe, so the
+                   stripe does not blink off as the pointer crosses the list
+     selected      a stronger accent wash plus a 3px bar on the leading edge
+     current       accent title and the equaliser bars, and nothing else
+
+   `background-image` carries the overlay and `background-color` carries the
+   stripe, which is what lets the two composite instead of replacing. */
+
+.mp-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  min-height: 46px;
+  background-color: transparent;
+  /* Never shrink: the list is a column flex, and a row with less room than it
+     wants would squash its two text lines together instead of scrolling. */
+  flex: 0 0 auto;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--mp-dur) var(--mp-ease);
+}
+
+.mp-row.is-odd {
+  background-color: var(--mp-zebra, transparent);
+}
+
+.mp-row:hover {
+  background-image: linear-gradient(
+    var(--background-modifier-hover),
+    var(--background-modifier-hover)
+  );
+}
+
+.mp-row.is-selected {
+  background-image: linear-gradient(
+    var(--mp-sel-wash, var(--background-modifier-active-hover)),
+    var(--mp-sel-wash, var(--background-modifier-active-hover))
+  );
+}
+
+/* The leading bar is the "this one is in the selection" signal that survives
+   greyscale, a colour-blind theme and a screenshot in a bug report. */
+.mp-row.is-selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--interactive-accent);
+}
+
+/* The keyboard cursor. An outline, not a shadow: it does not blur, it does not
+   composite, and it draws inside the row so nothing shifts. */
+.mp-row.is-focused {
+  outline: 1px solid var(--interactive-accent);
+  outline-offset: -1px;
+}
+
+.mp-row.is-current .mp-row-title {
+  color: var(--interactive-accent);
+  font-weight: 600;
+}
+
+.mp-row.is-unplayable .mp-row-title {
+  color: var(--text-muted);
+}
+
+.mp-row-lead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 16px;
+}
+
+.mp-row-index {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The playing indicator replaces the row number: three bars that stand still
+   while paused and dance while playing. Both states are the same element, so
+   toggling play never reflows the row. */
+.mp-row-bars {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.mp-row.is-current .mp-row-bars {
+  display: flex;
+}
+
+.mp-row.is-current .mp-row-index {
+  display: none;
+}
+
+.mp-row-bar {
+  width: 2px;
+  border-radius: 1px;
+  background: var(--interactive-accent);
+  transform-origin: bottom;
+}
+
+.mp-row-bar:nth-child(1) {
+  height: 45%;
+  animation-delay: 0ms;
+}
+
+.mp-row-bar:nth-child(2) {
+  height: 100%;
+  animation-delay: 160ms;
+}
+
+.mp-row-bar:nth-child(3) {
+  height: 65%;
+  animation-delay: 320ms;
+}
+
+.mp-row.is-current.is-playing .mp-row-bar {
+  animation: mp-eq 900ms ease-in-out infinite;
+}
+
+body[data-mp-motion="none"] .mp-row-bar {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-row-bar {
+    animation: none;
+  }
+}
+
+@keyframes mp-eq {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* --------------------------------------------------------------- the checkbox
+
+   The slot is always 15px wide so showing the box never reflows the row, but
+   the box itself only appears when it is useful: while the pointer is in the
+   row, while the row is selected, or while any selection exists at all — that
+   last case is what makes "how do I deselect the rest?" answerable without
+   hunting for a hidden control. */
+
+.mp-row-check {
+  width: 15px;
+  height: 15px;
+  opacity: 0;
+  transition: opacity var(--mp-dur) var(--mp-ease);
+}
+
+.mp-row:hover .mp-row-check,
+.mp-row.is-selected .mp-row-check,
+.mp-list.has-selection .mp-row-check {
+  opacity: 1;
+}
+
+.mp-row-check:focus-visible {
+  opacity: 1;
+}
+
+.mp-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mp-row-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-ui-small);
+  line-height: 1.35;
+}
+
+.mp-row-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.35;
+}
+
+.mp-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.mp-row-ext {
+  padding: 1px 4px;
+  border-radius: var(--mp-radius);
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.mp-row-size {
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-row-warn {
+  color: var(--text-error);
+}
+
+/* Hidden until the row is under the pointer, so a list of 200 rows is not 200
+   buttons' worth of visual noise. */
+.mp-row-more {
+  opacity: 0;
+  transition: opacity var(--mp-dur) var(--mp-ease);
+}
+
+.mp-row:hover .mp-row-more,
+.mp-row.is-selected .mp-row-more,
+.mp-row.is-current .mp-row-more {
+  opacity: 1;
+}
+
+.mp-row-more:focus-visible {
+  opacity: 1;
+}
